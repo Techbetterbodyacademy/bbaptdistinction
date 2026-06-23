@@ -71,10 +71,20 @@ describe("POST /api/meal-plan/generate", () => {
 
   test("400 on intake validation failure", async () => {
     vi.mocked(createClient).mockResolvedValue(mockSupabaseAuth({ id: "u-1" }) as never);
-    const bad = { clientId: VALID_CLIENT_ID, intake: { ...validBody.intake, age: 10 } };
+    const bad = { clientId: VALID_CLIENT_ID, intake: { ...validBody.intake, mealsPerDay: 99 } };
     const req = new Request("http://x/api/meal-plan/generate", { method: "POST", body: JSON.stringify(bad) });
     const res = await POST(req);
     expect(res.status).toBe(400);
+  });
+
+  test("422 with NEEDS_BIOMETRICS code when biometrics missing", async () => {
+    vi.mocked(createClient).mockResolvedValue(mockSupabaseAuth({ id: "u-1" }) as never);
+    const bad = { clientId: VALID_CLIENT_ID, intake: { ...validBody.intake, age: 0, heightCm: 0, weightKg: 0 } };
+    const req = new Request("http://x/api/meal-plan/generate", { method: "POST", body: JSON.stringify(bad) });
+    const res = await POST(req);
+    expect(res.status).toBe(422);
+    const body = await res.json();
+    expect(body.code).toBe("NEEDS_BIOMETRICS");
   });
 
   test("429 when daily cap exceeded", async () => {

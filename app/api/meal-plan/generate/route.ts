@@ -14,9 +14,9 @@ import { z } from "zod";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const BodySchema = z.object({
+const BodyShape = z.object({
   clientId: z.string().uuid(),
-  intake: MemberIntake
+  intake: z.record(z.unknown())
 });
 
 const DAILY_CAP = Number(process.env.MEAL_PLAN_MAX_PER_DAY_PER_WORKSPACE ?? 50);
@@ -29,11 +29,26 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const parsed = BodySchema.safeParse(raw);
-  if (!parsed.success) {
-    return Response.json({ error: "invalid_body", details: parsed.error.flatten() }, { status: 400 });
+  const bodyParsed = BodyShape.safeParse(raw);
+  if (!bodyParsed.success) {
+    return Response.json({ error: "invalid_body", details: bodyParsed.error.flatten() }, { status: 400 });
   }
-  const { clientId, intake } = parsed.data;
+  const { clientId, intake: rawIntake } = bodyParsed.data;
+
+  // Biometric pre-check: detect missing biometrics before full validation.
+  const i = rawIntake as Record<string, unknown>;
+  const age = typeof i.age === "number" ? i.age : 0;
+  const heightCm = typeof i.heightCm === "number" ? i.heightCm : 0;
+  const weightKg = typeof i.weightKg === "number" ? i.weightKg : 0;
+  if (age < 16 || heightCm < 120 || weightKg < 35) {
+    return Response.json({ error: "missing_biometrics", code: "NEEDS_BIOMETRICS" }, { status: 422 });
+  }
+
+  const intakeParsed = MemberIntake.safeParse(rawIntake);
+  if (!intakeParsed.success) {
+    return Response.json({ error: "invalid_intake", details: intakeParsed.error.flatten() }, { status: 400 });
+  }
+  const intake = intakeParsed.data;
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
