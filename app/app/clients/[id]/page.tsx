@@ -6,6 +6,7 @@ import { Sparkline } from "@/components/sparkline";
 import { setClientStage } from "./stage-actions";
 import { scheduleLifecycleEvent, markEventComplete, cancelEvent } from "./event-actions";
 import { reassignCoach } from "./coach-actions";
+import { BiometricsForm } from "./biometrics-form";
 import type { LifecycleStage } from "@/lib/jase-watches";
 import { LIFECYCLE_EVENT_TYPES, type LifecycleEventType } from "@/lib/lifecycle-event";
 
@@ -16,11 +17,12 @@ export default async function ClientDetailPage({
   searchParams
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; biometrics?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
   const tab: Tab = sp.tab === "info" ? "info" : sp.tab === "logbook" ? "logbook" : "activity";
+  const biometricsSaved = sp.biometrics === "1";
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -34,7 +36,7 @@ export default async function ClientDetailPage({
   const { data: client } = await supabase
     .from("client_profile")
     .select(`
-      id, user_id, coach_id, status, lifecycle_stage, audience, age, height_cm, start_weight_kg, current_weight_kg, created_at,
+      id, user_id, coach_id, status, lifecycle_stage, audience, age, height_cm, start_weight_kg, current_weight_kg, sex, created_at,
       user_profile:user_id(full_name, avatar_url)
     `)
     .eq("id", id)
@@ -112,6 +114,15 @@ export default async function ClientDetailPage({
         <Link href={`/app/clients/${id}/files`} className="btn btn-ghost text-sm">Files</Link>
         <Link href={`/app/clients/${id}/meal-plan`} className="btn btn-ghost text-sm">Meal plan</Link>
       </nav>
+
+      <BiometricsForm
+        clientId={client.id}
+        age={client.age ?? null}
+        heightCm={client.height_cm ?? null}
+        currentWeightKg={client.current_weight_kg ?? null}
+        sex={(client.sex as "male" | "female" | "neutral" | null) ?? null}
+        saved={biometricsSaved}
+      />
 
       <StageBar
         clientId={client.id}

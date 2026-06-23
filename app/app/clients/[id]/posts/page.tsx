@@ -99,7 +99,7 @@ function StatusBadge({ status }: { status: string }) {
     draft: { bg: "rgba(255,255,255,0.06)", text: "var(--color-muted)" },
     ready: { bg: "rgba(0,174,239,0.15)", text: "var(--color-blue-glow)" },
     published: { bg: "rgba(34,197,94,0.15)", text: "var(--color-ok)" },
-    archived: { bg: "rgba(245,158,11,0.15)", text: "var(--color-warn)" }
+    archived: { bg: "rgba(148,163,184,0.15)", text: "var(--color-warn)" }
   };
   const c = map[status] ?? map.draft;
   return (

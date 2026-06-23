@@ -12,15 +12,22 @@ export default async function MealPlanCoachPage({ params }: PageProps) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // The route param is the client_profile.id. Biometrics live on client_profile,
+  // but the meal_plan.client_id FK references user_profile.id, so we need to fetch
+  // both: the biometrics + the user_profile id for the API call.
   const { data: client } = await supabase
-    .from("user_profile")
-    .select("id, full_name, age, height_cm, current_weight_kg, sex, workspace_id")
+    .from("client_profile")
+    .select("id, user_id, age, height_cm, current_weight_kg, sex, workspace_id, user_profile:user_id(full_name)")
     .eq("id", clientId)
     .maybeSingle();
 
   if (!client) redirect("/app/clients");
 
-  const allPlans = await listPlansForCoach(supabase as never, clientId, { includeFailed: true });
+  // user_profile is returned as an array even for to-one joins in some Supabase versions
+  const userProfile = Array.isArray(client.user_profile) ? client.user_profile[0] : client.user_profile;
+  const fullName = userProfile?.full_name ?? "Client";
+
+  const allPlans = await listPlansForCoach(supabase as never, client.user_id, { includeFailed: true });
   const readyPlans = allPlans.filter((p) => p.status !== "failed");
   const failedPlans = allPlans.filter((p) => p.status === "failed");
 
@@ -28,11 +35,11 @@ export default async function MealPlanCoachPage({ params }: PageProps) {
     <main className="max-w-3xl mx-auto px-6 py-10 space-y-10">
       <header>
         <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold">Meal plan</div>
-        <h1 className="text-3xl font-extrabold tracking-tight mt-1">{client.full_name}</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight mt-1">{fullName}</h1>
       </header>
 
       <GenerateForm
-        clientId={client.id}
+        clientId={client.user_id}
         prefill={{
           age: client.age ?? 0,
           heightCm: client.height_cm ?? 0,
@@ -41,7 +48,7 @@ export default async function MealPlanCoachPage({ params }: PageProps) {
         }}
       />
 
-      <HistoryList plans={readyPlans} failedPlans={failedPlans} clientId={clientId} />
+      <HistoryList plans={readyPlans} failedPlans={failedPlans} clientId={client.user_id} />
     </main>
   );
 }
