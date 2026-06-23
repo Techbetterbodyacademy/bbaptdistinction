@@ -63,6 +63,12 @@ export default async function ClientLayout({
               Program
             </Link>
             <Link
+              href="/client/meal-plan"
+              className="text-sm text-[var(--color-muted)] hover:text-[var(--color-ink)] px-3 py-2 rounded-lg hover:bg-[rgba(255,255,255,0.04)]"
+            >
+              Meal plan
+            </Link>
+            <Link
               href="/client/habits"
               className="text-sm text-[var(--color-muted)] hover:text-[var(--color-ink)] px-3 py-2 rounded-lg hover:bg-[rgba(255,255,255,0.04)]"
             >
