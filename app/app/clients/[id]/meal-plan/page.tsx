@@ -4,10 +4,10 @@ import { listPlansForCoach } from "@/lib/meal-plan/storage";
 import { GenerateForm } from "@/components/meal-plan/generate-form";
 import { HistoryList } from "@/components/meal-plan/history-list";
 
-type PageProps = { params: Promise<{ clientId: string }> };
+type PageProps = { params: Promise<{ id: string }> };
 
 export default async function MealPlanCoachPage({ params }: PageProps) {
-  const { clientId } = await params;
+  const { id: clientId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

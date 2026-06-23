@@ -110,6 +110,7 @@ export default async function ClientDetailPage({
         <Link href={`/app/clients/${id}/results`} className="btn btn-ghost text-sm">Results</Link>
         <Link href={`/app/clients/${id}/notes`} className="btn btn-ghost text-sm">Notes</Link>
         <Link href={`/app/clients/${id}/files`} className="btn btn-ghost text-sm">Files</Link>
+        <Link href={`/app/clients/${id}/meal-plan`} className="btn btn-ghost text-sm">Meal plan</Link>
       </nav>
 
       <StageBar

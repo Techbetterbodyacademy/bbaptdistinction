@@ -4,10 +4,10 @@ import { getPlan } from "@/lib/meal-plan/storage";
 import { PlanReadOnly } from "@/components/meal-plan/plan-read-only";
 import { Plan } from "@/lib/meal-plan/schema";
 
-type PageProps = { params: Promise<{ clientId: string; planId: string }> };
+type PageProps = { params: Promise<{ id: string; planId: string }> };
 
 export default async function MealPlanReadOnlyPage({ params }: PageProps) {
-  const { clientId, planId } = await params;
+  const { id: clientId, planId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
