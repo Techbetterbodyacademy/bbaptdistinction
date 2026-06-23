@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #000000;
+  --color-bg-deep: #050505;
+  --color-surface: #0a0e1a;
+  --color-surface-2: #0f1626;
+  --color-ink: #ffffff;
+  --color-muted: rgba(255, 255, 255, 0.68);
+  --color-subtle: rgba(255, 255, 255, 0.5);
+  --color-line: rgba(255, 255, 255, 0.1);
+  --color-line-strong: rgba(255, 255, 255, 0.2);
+  --color-blue: #00aeef;
+  --color-blue-dark: #0089bd;
+  --color-blue-glow: #38c5ff;
+  --color-ok: #22c55e;
+  --color-warn: #f59e0b;
+  --color-danger: #ef4444;
+
+  --font-display: "Inter", system-ui, -apple-system, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.55;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  border: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-blue), var(--color-blue-glow));
+  color: #000;
+  box-shadow: 0 10px 28px -10px rgba(0, 174, 239, 0.5);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-ink);
+}
+.btn-ghost:hover {
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-line-strong);
+  border-radius: 12px;
+  color: var(--color-ink);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.input:focus {
+  border-color: var(--color-blue);
+  background: rgba(255, 255, 255, 0.08);
+}
+.input::placeholder {
+  color: var(--color-subtle);
+}
+
+.label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--color-subtle);
+  margin-bottom: 7px;
+}
