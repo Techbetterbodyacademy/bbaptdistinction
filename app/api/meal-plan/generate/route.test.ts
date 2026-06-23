@@ -21,8 +21,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createStreamingPlan, countTodayPlansForWorkspace } from "@/lib/meal-plan/storage";
 import { streamObject } from "ai";
 
+const VALID_CLIENT_ID = "123e4567-e89b-12d3-a456-426614174000";
+
 const validBody = {
-  clientId: "c-1",
+  clientId: VALID_CLIENT_ID,
   intake: {
     age: 40, heightCm: 180, weightKg: 90, sex: "male",
     activity: "moderate", goal: "maintain",
@@ -33,13 +35,17 @@ const validBody = {
   }
 };
 
-function mockSupabaseAuth(user: { id: string } | null) {
+function mockSupabaseAuth(user: { id: string } | null, clientWorkspaceId: string | null = "w-1") {
   return {
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user }, error: null }) },
-    from: vi.fn(() => ({
+    from: vi.fn((table: string) => ({
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
-      maybeSingle: vi.fn().mockResolvedValue({ data: { id: "w-1", owner_id: user?.id ?? "" }, error: null })
+      maybeSingle: vi.fn().mockResolvedValue(
+        table === "workspace"
+          ? { data: { id: "w-1", owner_id: user?.id ?? "" }, error: null }
+          : { data: clientWorkspaceId == null ? null : { id: VALID_CLIENT_ID, workspace_id: clientWorkspaceId }, error: null }
+      )
     }))
   };
 }
@@ -65,7 +71,7 @@ describe("POST /api/meal-plan/generate", () => {
 
   test("400 on intake validation failure", async () => {
     vi.mocked(createClient).mockResolvedValue(mockSupabaseAuth({ id: "u-1" }) as never);
-    const bad = { clientId: "c-1", intake: { ...validBody.intake, age: 10 } };
+    const bad = { clientId: VALID_CLIENT_ID, intake: { ...validBody.intake, age: 10 } };
     const req = new Request("http://x/api/meal-plan/generate", { method: "POST", body: JSON.stringify(bad) });
     const res = await POST(req);
     expect(res.status).toBe(400);
@@ -77,6 +83,14 @@ describe("POST /api/meal-plan/generate", () => {
     const req = new Request("http://x/api/meal-plan/generate", { method: "POST", body: JSON.stringify(validBody) });
     const res = await POST(req);
     expect(res.status).toBe(429);
+  });
+
+  test("403 when client belongs to a different workspace", async () => {
+    vi.mocked(createClient).mockResolvedValue(mockSupabaseAuth({ id: "u-1" }, "other-workspace") as never);
+    vi.mocked(countTodayPlansForWorkspace).mockResolvedValue(0);
+    const req = new Request("http://x/api/meal-plan/generate", { method: "POST", body: JSON.stringify(validBody) });
+    const res = await POST(req);
+    expect(res.status).toBe(403);
   });
 
   test("happy path: creates streaming row, returns X-Plan-Id, streams body", async () => {

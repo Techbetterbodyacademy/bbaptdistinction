@@ -15,7 +15,7 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const BodySchema = z.object({
-  clientId: z.string().min(1),
+  clientId: z.string().uuid(),
   intake: MemberIntake
 });
 
@@ -45,6 +45,15 @@ export async function POST(req: Request): Promise<Response> {
     .eq("owner_id", user.id)
     .maybeSingle();
   if (!workspace) return Response.json({ error: "no_workspace" }, { status: 403 });
+
+  const { data: client } = await supabase
+    .from("user_profile")
+    .select("id, workspace_id")
+    .eq("id", clientId)
+    .maybeSingle();
+  if (!client || client.workspace_id !== workspace.id) {
+    return Response.json({ error: "client_not_in_workspace" }, { status: 403 });
+  }
 
   const used = await countTodayPlansForWorkspace(supabase as never, workspace.id);
   if (used >= DAILY_CAP) {
@@ -77,8 +86,7 @@ export async function POST(req: Request): Promise<Response> {
   });
 
   const upstream = result.toTextStreamResponse();
-  return new Response(upstream.body, {
-    status: upstream.status,
-    headers: new Headers([...upstream.headers, ["X-Plan-Id", planId]])
-  });
+  const headers = new Headers(upstream.headers);
+  headers.set("X-Plan-Id", planId);
+  return new Response(upstream.body, { status: upstream.status, headers });
 }
