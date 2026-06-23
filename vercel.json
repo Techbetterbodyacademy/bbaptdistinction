@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/flush-scheduled-messages",
       "schedule": "15 14 * * *"
+    },
+    {
+      "path": "/api/cron/reap-meal-plans",
+      "schedule": "*/15 * * * *"
     }
   ]
 }
