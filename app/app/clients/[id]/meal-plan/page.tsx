@@ -20,7 +20,9 @@ export default async function MealPlanCoachPage({ params }: PageProps) {
 
   if (!client) redirect("/app/clients");
 
-  const plans = await listPlansForCoach(supabase as never, clientId);
+  const allPlans = await listPlansForCoach(supabase as never, clientId, { includeFailed: true });
+  const readyPlans = allPlans.filter((p) => p.status !== "failed");
+  const failedPlans = allPlans.filter((p) => p.status === "failed");
 
   return (
     <main className="max-w-3xl mx-auto px-6 py-10 space-y-10">
@@ -39,7 +41,7 @@ export default async function MealPlanCoachPage({ params }: PageProps) {
         }}
       />
 
-      <HistoryList plans={plans} clientId={clientId} />
+      <HistoryList plans={readyPlans} failedPlans={failedPlans} clientId={clientId} />
     </main>
   );
 }
