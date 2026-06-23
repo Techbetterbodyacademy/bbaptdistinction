@@ -17,7 +17,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
   // Verify caller is the coach who owns this invite
   const { data: invite } = await supabase
     .from("client_invite")
-    .select("id, email, workspace_id, status, full_name")
+    .select("id, email, workspace_id, status, full_name, token")
     .eq("id", inviteId)
     .maybeSingle();
 
@@ -40,6 +40,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
   const admin = createServiceClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://app-src-indol.vercel.app";
 
+  const nextPath = `/intake?invite=${invite.token}`;
+
   const { data, error } = await admin.auth.admin.generateLink({
     type: "magiclink",
     email: invite.email,
@@ -48,7 +50,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     }
   });
 
-  if (error || !data?.properties?.action_link) {
+  if (error || !data?.properties?.hashed_token) {
     console.error("[invite-link] generateLink failed", error?.message);
     // If the user doesn't exist in auth yet, generate a signup link instead
     const { data: signupData, error: signupError } = await admin.auth.admin.generateLink({
@@ -61,13 +63,15 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       }
     });
 
-    if (signupError || !signupData?.properties?.action_link) {
+    if (signupError || !signupData?.properties?.hashed_token) {
       console.error("[invite-link] signup generateLink also failed", signupError?.message);
       return NextResponse.json({ error: signupError?.message ?? error?.message ?? "failed" }, { status: 500 });
     }
 
-    return NextResponse.json({ link: signupData.properties.action_link });
+    const signupLink = `${siteUrl}/auth/confirm?token_hash=${signupData.properties.hashed_token}&type=signup&next=${encodeURIComponent(nextPath)}`;
+    return NextResponse.json({ link: signupLink });
   }
 
-  return NextResponse.json({ link: data.properties.action_link });
+  const link = `${siteUrl}/auth/confirm?token_hash=${data.properties.hashed_token}&type=magiclink&next=${encodeURIComponent(nextPath)}`;
+  return NextResponse.json({ link });
 }

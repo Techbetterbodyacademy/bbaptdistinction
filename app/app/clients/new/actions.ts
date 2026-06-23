@@ -74,7 +74,7 @@ export async function inviteClient(formData: FormData) {
     redirect("/app/clients/new?error=duplicate");
   }
 
-  // Insert + capture the id immediately so we can always link to the share page
+  // Insert + capture the id and token immediately so we can always link to the share page
   const { data: created, error: insertError } = await service
     .from("client_invite")
     .insert({
@@ -83,7 +83,7 @@ export async function inviteClient(formData: FormData) {
       email,
       full_name: fullName
     })
-    .select("id")
+    .select("id, token")
     .single();
 
   if (insertError || !created) {
@@ -113,13 +113,17 @@ export async function inviteClient(formData: FormData) {
     }
   });
 
-  if (linkError || !linkData?.properties?.action_link) {
+  if (linkError || !linkData?.properties?.hashed_token) {
     console.error("[invite] generateLink failed", linkError?.message);
     // Coach can still copy a token-based share link
     redirect(`/app/clients/invite/${created.id}?emailFailed=1`);
   }
 
-  const magicLink = linkData.properties.action_link;
+  // Use the modern server-side confirm flow (token_hash query) instead of the
+  // legacy action_link which puts the access_token in the hash fragment and
+  // doesn't reach the server. The "next" param routes the new user to intake.
+  const nextPath = `/intake?invite=${created.token}`;
+  const magicLink = `${origin}/auth/confirm?token_hash=${linkData.properties.hashed_token}&type=magiclink&next=${encodeURIComponent(nextPath)}`;
 
   const result = await sendEmail({
     to: email,
