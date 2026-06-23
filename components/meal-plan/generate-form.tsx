@@ -44,6 +44,8 @@ export function GenerateForm({ clientId, prefill }: Props) {
     api: "/api/meal-plan/generate",
     schema: Plan,
     onFinish: ({ error: e }) => {
+      setSubmitting(false);
+      setStreaming(false);
       if (!e) {
         router.refresh();
       }
