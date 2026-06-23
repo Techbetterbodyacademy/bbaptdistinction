@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ShareLinkButton } from "./share-link-button";
+import { CancelInviteButton } from "./cancel-invite-button";
 
 export default async function InviteShareLinkPage({
   params,
@@ -72,8 +73,9 @@ export default async function InviteShareLinkPage({
         <ShareLinkButton inviteId={invite.id} />
       </section>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <Link href="/app/clients" className="btn btn-ghost">Back to roster</Link>
+        <CancelInviteButton inviteId={invite.id} fullName={invite.full_name} />
         <Link href="/app/clients/new" className="btn btn-primary ml-auto">Invite another</Link>
       </div>
     </main>
