@@ -38,7 +38,7 @@ export async function uploadAvatar(
 
   const path = avatarPath(userId, ext);
   const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
-    cacheControl: "3600",
+    cacheControl: "0",
     upsert: true,
     contentType: file.type || "image/jpeg"
   });
@@ -47,11 +47,16 @@ export async function uploadAvatar(
     return { ok: false, error: uploadError.message };
   }
 
-  const publicUrl = getPublicAvatarUrl(supabase, path);
-  if (!publicUrl) {
+  const rawUrl = getPublicAvatarUrl(supabase, path);
+  if (!rawUrl) {
     return { ok: false, error: "Could not resolve public URL" };
   }
-  return { ok: true, path, publicUrl };
+
+  // Append a cache-busting version param so the browser always re-fetches the latest avatar.
+  // Without this, a re-upload to the same path (e.g. user-id/avatar.jpg) returns the cached
+  // previous image until the CDN expires.
+  const versioned = `${rawUrl}?v=${Date.now()}`;
+  return { ok: true, path, publicUrl: versioned };
 }
 
 export async function removeAllAvatars(supabase: SupabaseClient, userId: string): Promise<void> {
