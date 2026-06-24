@@ -4,10 +4,13 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { uploadAvatar, removeAllAvatars } from "@/lib/avatar";
+import { uploadAvatarToR2, isR2Configured } from "@/lib/r2";
 
 /**
  * Client-friendly avatar upload that returns a result instead of redirecting.
  * Used by the client-component cropper.
+ * Storage backend: Cloudflare R2 (10GB free, no egress fees). Falls back to Supabase
+ * Storage only if R2 env vars are not yet configured.
  */
 export async function saveProfilePictureClient(
   formData: FormData
@@ -21,15 +24,28 @@ export async function saveProfilePictureClient(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in" };
 
-  const result = await uploadAvatar(supabase as never, user.id, file as File);
-  if (!result.ok) {
-    console.error("[avatar] upload failed", result.error);
-    return { ok: false, error: result.error };
+  let publicUrl: string;
+
+  if (isR2Configured()) {
+    const r2 = await uploadAvatarToR2(file as File, user.id);
+    if (!r2.ok) {
+      console.error("[avatar] r2 upload failed", r2.error);
+      return { ok: false, error: r2.error };
+    }
+    publicUrl = r2.url;
+  } else {
+    // Fallback: legacy Supabase Storage path. Kept for safety until R2 env vars are set.
+    const result = await uploadAvatar(supabase as never, user.id, file as File);
+    if (!result.ok) {
+      console.error("[avatar] supabase upload failed", result.error);
+      return { ok: false, error: result.error };
+    }
+    publicUrl = result.publicUrl;
   }
 
   const { error: updateError } = await supabase
     .from("user_profile")
-    .update({ avatar_url: result.publicUrl })
+    .update({ avatar_url: publicUrl })
     .eq("id", user.id);
 
   if (updateError) {
@@ -40,7 +56,7 @@ export async function saveProfilePictureClient(
   // Invalidate the LAYOUTS (not just pages) so the sidebar / client nav avatars refresh.
   revalidatePath("/client", "layout");
   revalidatePath("/app", "layout");
-  return { ok: true, url: result.publicUrl };
+  return { ok: true, url: publicUrl };
 }
 
 /**
