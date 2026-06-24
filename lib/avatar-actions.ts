@@ -37,8 +37,9 @@ export async function saveProfilePictureClient(
     return { ok: false, error: "Saved the file but could not save the link" };
   }
 
-  revalidatePath("/client");
-  revalidatePath("/app");
+  // Invalidate the LAYOUTS (not just pages) so the sidebar / client nav avatars refresh.
+  revalidatePath("/client", "layout");
+  revalidatePath("/app", "layout");
   return { ok: true, url: result.publicUrl };
 }
 
@@ -62,8 +63,8 @@ export async function removeProfilePictureClient(): Promise<{ ok: true } | { ok:
     return { ok: false, error: error.message };
   }
 
-  revalidatePath("/client");
-  revalidatePath("/app");
+  revalidatePath("/client", "layout");
+  revalidatePath("/app", "layout");
   return { ok: true };
 }
 
@@ -96,8 +97,8 @@ export async function uploadProfilePicture(formData: FormData): Promise<void> {
     redirect(`${returnTo}?error=save_failed`);
   }
 
-  revalidatePath("/client");
-  revalidatePath("/app");
+  revalidatePath("/client", "layout");
+  revalidatePath("/app", "layout");
   revalidatePath(returnTo);
   redirect(`${returnTo}?saved=avatar`);
 }
@@ -122,8 +123,8 @@ export async function removeProfilePicture(formData: FormData): Promise<void> {
     redirect(`${returnTo}?error=save_failed`);
   }
 
-  revalidatePath("/client");
-  revalidatePath("/app");
+  revalidatePath("/client", "layout");
+  revalidatePath("/app", "layout");
   revalidatePath(returnTo);
   redirect(`${returnTo}?saved=avatar_removed`);
 }

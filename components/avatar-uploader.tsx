@@ -246,7 +246,7 @@ export function AvatarUploader({ currentUrl, name, role, returnTo }: Props) {
               disabled={uploading}
               className="btn btn-primary text-sm disabled:opacity-50"
             >
-              {uploading ? "Uploading…" : "Use this crop"}
+              {uploading ? "Saving…" : "Save"}
             </button>
           </div>
         </div>
