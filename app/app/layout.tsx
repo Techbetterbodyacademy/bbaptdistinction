@@ -37,7 +37,7 @@ export default async function AppLayout({
 
   return (
     <div
-      className="min-h-screen flex"
+      className="min-h-screen flex flex-col lg:flex-row"
       style={{
         // Workspace can override the primary blue via their own brand color
         ["--color-blue" as string]: workspace.primary_color ?? "#00AEEF"

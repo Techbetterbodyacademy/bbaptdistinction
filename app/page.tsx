@@ -73,13 +73,13 @@ function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-[var(--color-line)]">
       <HeroGlow />
-      <div className="relative max-w-6xl mx-auto px-6 py-24 sm:py-32">
+      <div className="relative max-w-6xl mx-auto px-5 sm:px-6 py-16 sm:py-24 lg:py-32">
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[2px] font-bold text-[var(--color-blue-glow)] mb-6 px-3 py-1.5 rounded-full bg-[rgba(0,174,239,0.08)] border border-[rgba(0,174,239,0.25)]">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-blue-glow)] animate-pulse" />
             Now coaching men 40 to 60
           </div>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6">
             Build the body you actually <span style={{ fontFamily: "var(--font-serif)" }} className="italic text-[var(--color-blue-glow)]">want</span>.
           </h1>
           <p className="text-lg sm:text-xl text-[var(--color-muted)] mb-10 max-w-2xl">

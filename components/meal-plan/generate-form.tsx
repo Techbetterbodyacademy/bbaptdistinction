@@ -94,7 +94,7 @@ export function GenerateForm({ clientId, prefill }: Props) {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label className="block">
             <span className="text-xs uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold">Goal</span>
             <select value={goal} onChange={(e) => setGoal(e.target.value as never)} className="mt-1 w-full bg-[var(--color-bg-deep)] border border-[var(--color-line)] rounded-lg px-3 py-2 text-sm">

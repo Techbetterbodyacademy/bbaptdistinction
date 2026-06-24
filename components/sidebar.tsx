@@ -4,6 +4,25 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+function MenuIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="18" x2="20" y2="18" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
 type NavItem = {
   href: string;
   label: string;
@@ -58,12 +77,31 @@ export function Sidebar({
     (l) => pathname === l.href || pathname.startsWith(l.href + "/")
   );
   const [libraryOpen, setLibraryOpen] = useState(isLibraryActive);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   useEffect(() => {
     if (isLibraryActive) setLibraryOpen(true);
   }, [isLibraryActive]);
 
-  return (
-    <aside className="w-[260px] shrink-0 border-r border-[var(--color-line)] bg-[var(--color-bg-deep)] flex flex-col">
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  const sidebarBody = (
+    <>
       <div className="px-5 py-5 border-b border-[var(--color-line)] flex items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -76,6 +114,14 @@ export function Sidebar({
           <div className="text-base font-extrabold truncate">{workspaceName}</div>
           <div className="text-xs text-[var(--color-muted)] truncate">{coachName}</div>
         </div>
+        <button
+          type="button"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close menu"
+          className="lg:hidden p-2 -mr-2 rounded-lg hover:bg-[rgba(255,255,255,0.04)]"
+        >
+          <CloseIcon />
+        </button>
       </div>
 
       <nav className="px-3 py-4 flex-1 overflow-y-auto">
@@ -99,7 +145,53 @@ export function Sidebar({
           Sign out
         </button>
       </form>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar with hamburger */}
+      <div className="lg:hidden sticky top-0 z-30 bg-[var(--color-bg-deep)] border-b border-[var(--color-line)] flex items-center gap-3 px-4 py-3">
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open menu"
+          className="p-2 -ml-2 rounded-lg hover:bg-[rgba(255,255,255,0.04)]"
+        >
+          <MenuIcon />
+        </button>
+        <div className="flex items-center gap-2 min-w-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/bba-badge.png"
+            alt="BBA"
+            className="w-7 h-7 rounded-full shrink-0"
+            style={{ filter: "drop-shadow(0 2px 8px rgba(0,174,239,0.35))" }}
+          />
+          <span className="text-sm font-extrabold truncate">{workspaceName}</span>
+        </div>
+      </div>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-[260px] shrink-0 border-r border-[var(--color-line)] bg-[var(--color-bg-deep)] flex-col">
+        {sidebarBody}
+      </aside>
+
+      {/* Mobile drawer overlay */}
+      {mobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 bg-[rgba(0,0,0,0.85)] backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        >
+          <aside
+            className="w-[280px] max-w-[85vw] h-full bg-[var(--color-bg-deep)] border-r border-[var(--color-line)] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {sidebarBody}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
 
