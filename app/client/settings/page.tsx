@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { updateClientAccount, updateClientPassword } from "./actions";
+import { AvatarUploader } from "@/components/avatar-uploader";
 
 type PageProps = {
   searchParams: Promise<{ saved?: string; error?: string }>;
@@ -28,7 +29,7 @@ export default async function ClientSettingsPage({ searchParams }: PageProps) {
 
   const { data: profile } = await supabase
     .from("user_profile")
-    .select("full_name")
+    .select("full_name, avatar_url")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -37,7 +38,11 @@ export default async function ClientSettingsPage({ searchParams }: PageProps) {
     ? "Name updated."
     : sp.saved === "password"
       ? "Password updated."
-      : null;
+      : sp.saved === "avatar"
+        ? "Profile picture updated."
+        : sp.saved === "avatar_removed"
+          ? "Profile picture removed."
+          : null;
 
   return (
     <main className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-8">
@@ -62,6 +67,13 @@ export default async function ClientSettingsPage({ searchParams }: PageProps) {
           {errorMessage}
         </div>
       ) : null}
+
+      <AvatarUploader
+        currentUrl={profile?.avatar_url ?? null}
+        name={profile?.full_name ?? "You"}
+        role="client"
+        returnTo="/client/settings"
+      />
 
       <section className="bg-[var(--color-surface)] border border-[var(--color-line)] rounded-2xl p-6">
         <h2 className="text-xs uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-4">

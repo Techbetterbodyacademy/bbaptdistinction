@@ -35,6 +35,12 @@ export default async function AppLayout({
     redirect("/onboarding");
   }
 
+  const { data: coachProfile } = await supabase
+    .from("user_profile")
+    .select("avatar_url, full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
   // Fetch notification counts for sidebar badges (unread messages, new check-ins, pending invites).
   // All scoped to this workspace via RLS + explicit filter.
   const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -82,7 +88,12 @@ export default async function AppLayout({
         ["--color-blue" as string]: workspace.primary_color ?? "#00AEEF"
       }}
     >
-      <Sidebar workspaceName={workspace.name} coachName={workspace.coach_name} counts={counts} />
+      <Sidebar
+        workspaceName={workspace.name}
+        coachName={workspace.coach_name}
+        coachAvatarUrl={coachProfile?.avatar_url ?? null}
+        counts={counts}
+      />
       <div className="flex-1 min-w-0">{children}</div>
       <IdleTimer />
     </div>

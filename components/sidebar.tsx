@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Avatar } from "@/components/avatar";
 
 function MenuIcon() {
   return (
@@ -75,10 +76,12 @@ export type SidebarCounts = {
 export function Sidebar({
   workspaceName,
   coachName,
+  coachAvatarUrl,
   counts
 }: {
   workspaceName: string;
   coachName: string;
+  coachAvatarUrl?: string | null;
   counts?: SidebarCounts;
 }) {
   const pathname = usePathname();
@@ -123,13 +126,14 @@ export function Sidebar({
   const sidebarBody = (
     <>
       <div className="px-5 py-5 border-b border-[var(--color-line)] flex items-center gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/bba-badge.png"
-          alt="Better Body Academy"
-          className="w-11 h-11 shrink-0 rounded-full"
-          style={{ filter: "drop-shadow(0 4px 14px rgba(0,174,239,0.35))" }}
-        />
+        <Link href="/app/settings/account" className="group" aria-label="Account settings">
+          <Avatar
+            url={coachAvatarUrl}
+            name={coachName}
+            size="lg"
+            className="group-hover:ring-2 group-hover:ring-[var(--color-blue-glow)] transition"
+          />
+        </Link>
         <div className="min-w-0 flex-1">
           <div className="text-base font-extrabold truncate">{workspaceName}</div>
           <div className="text-xs text-[var(--color-muted)] truncate">{coachName}</div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { sendMessageAsClient } from "./actions";
 import { MessageThread } from "@/components/messages/message-thread";
+import { Avatar } from "@/components/avatar";
 
 export default async function ClientMessagesPage() {
   const supabase = await createClient();
@@ -23,9 +24,17 @@ export default async function ClientMessagesPage() {
 
   const { data: workspace } = await supabase
     .from("workspace")
-    .select("coach_name")
+    .select("coach_name, owner_id")
     .eq("id", clientProfile.workspace_id)
     .maybeSingle();
+
+  const { data: coachProfile } = workspace?.owner_id
+    ? await supabase
+        .from("user_profile")
+        .select("avatar_url, full_name")
+        .eq("id", workspace.owner_id)
+        .maybeSingle()
+    : { data: null };
 
   const { data: thread } = await supabase
     .from("message_thread")
@@ -73,13 +82,20 @@ export default async function ClientMessagesPage() {
           &larr; Home
         </Link>
 
-        <header className="mt-4 mb-2 pb-4 border-b border-[var(--color-line)]">
-          <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-1">
-            Direct message
+        <header className="mt-4 mb-2 pb-4 border-b border-[var(--color-line)] flex items-center gap-3">
+          <Avatar
+            url={coachProfile?.avatar_url}
+            name={coachProfile?.full_name ?? workspace?.coach_name ?? "Coach"}
+            size="lg"
+          />
+          <div className="min-w-0">
+            <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-1">
+              Direct message
+            </div>
+            <h1 className="text-xl font-extrabold tracking-tight truncate">
+              {workspace?.coach_name ?? "Your coach"}
+            </h1>
           </div>
-          <h1 className="text-xl font-extrabold tracking-tight">
-            {workspace?.coach_name ?? "Your coach"}
-          </h1>
         </header>
       </div>
 

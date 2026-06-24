@@ -16,7 +16,7 @@ export default async function ClientLayout({
 
   const { data: profile } = await supabase
     .from("user_profile")
-    .select("workspace_id, role, full_name")
+    .select("workspace_id, role, full_name, avatar_url")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -87,7 +87,9 @@ export default async function ClientLayout({
     >
       <ClientNav
         firstName={profile.full_name?.split(" ")[0] ?? "there"}
+        fullName={profile.full_name ?? "there"}
         workspaceName={workspace?.name ?? ""}
+        avatarUrl={profile.avatar_url}
         counts={counts}
       />
       <div className="flex-1">{children}</div>

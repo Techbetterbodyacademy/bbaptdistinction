@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { updatePassword } from "./actions";
+import { AvatarUploader } from "@/components/avatar-uploader";
 
 export default async function AccountSettingsPage({
   searchParams
@@ -11,6 +12,12 @@ export default async function AccountSettingsPage({
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("user_profile")
+    .select("full_name, avatar_url")
+    .eq("id", user?.id ?? "")
+    .maybeSingle();
 
   // Detect how this account was created so we can phrase the form correctly.
   // If the user has a `providers` array including "email", they have a password.
@@ -31,6 +38,15 @@ export default async function AccountSettingsPage({
           Add or change the password you use to sign in.
         </p>
       </header>
+
+      <div className="mb-8">
+        <AvatarUploader
+          currentUrl={profile?.avatar_url ?? null}
+          name={profile?.full_name ?? "Coach"}
+          role="coach"
+          returnTo="/app/settings/account"
+        />
+      </div>
 
       <section className="mb-8">
         <h2 className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-3">

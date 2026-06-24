@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { Avatar } from "@/components/avatar";
 
 export type ClientNavCounts = {
   messages?: number;
@@ -12,7 +13,9 @@ export type ClientNavCounts = {
 
 type Props = {
   firstName: string;
+  fullName?: string;
   workspaceName: string;
+  avatarUrl?: string | null;
   counts?: ClientNavCounts;
 };
 
@@ -30,11 +33,12 @@ const NAV_LINKS = [
   { href: "/client/settings", label: "Settings", countKey: undefined }
 ];
 
-export function ClientNav({ firstName, workspaceName, counts }: Props) {
+export function ClientNav({ firstName, fullName, workspaceName, avatarUrl, counts }: Props) {
   const getCount = (key: keyof ClientNavCounts | undefined): number => {
     if (!key || !counts) return 0;
     return counts[key] ?? 0;
   };
+  const displayName = fullName ?? firstName;
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -55,15 +59,18 @@ export function ClientNav({ firstName, workspaceName, counts }: Props) {
 
   return (
     <header className="border-b border-[var(--color-line)] bg-[var(--color-bg-deep)] sticky top-0 z-40">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="text-xs uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold truncate">
-            {workspaceName}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+        <Link href="/client/settings" className="flex items-center gap-3 min-w-0 flex-1 group" aria-label="Settings">
+          <Avatar url={avatarUrl} name={displayName} size="md" className="group-hover:ring-2 group-hover:ring-[var(--color-blue-glow)] transition" />
+          <div className="min-w-0">
+            <div className="text-xs uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold truncate">
+              {workspaceName}
+            </div>
+            <div className="text-base font-extrabold truncate">
+              Hey, {firstName}.
+            </div>
           </div>
-          <div className="text-base font-extrabold truncate">
-            Hey, {firstName}.
-          </div>
-        </div>
+        </Link>
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-1">
@@ -74,7 +81,7 @@ export function ClientNav({ firstName, workspaceName, counts }: Props) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm px-3 py-2 rounded-lg transition-colors inline-flex items-center gap-1.5 ${
+                className={`text-sm px-3 py-2 rounded-lg transition-colors inline-flex items-center gap-1.5 whitespace-nowrap ${
                   isActive
                     ? "text-[var(--color-blue-glow)] bg-[rgba(0,174,239,0.1)] font-semibold"
                     : "text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:bg-[rgba(255,255,255,0.04)]"
@@ -94,7 +101,7 @@ export function ClientNav({ firstName, workspaceName, counts }: Props) {
           <form action="/auth/logout" method="post" className="ml-2">
             <button
               type="submit"
-              className="text-sm text-[var(--color-muted)] hover:text-[var(--color-ink)] px-3 py-2 rounded-lg hover:bg-[rgba(255,255,255,0.04)]"
+              className="text-sm text-[var(--color-muted)] hover:text-[var(--color-ink)] px-3 py-2 rounded-lg hover:bg-[rgba(255,255,255,0.04)] whitespace-nowrap"
             >
               Sign out
             </button>
@@ -133,12 +140,15 @@ export function ClientNav({ firstName, workspaceName, counts }: Props) {
             className="bg-[var(--color-bg-deep)] border-b border-[var(--color-line)] min-h-screen flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-line)]">
-              <div className="min-w-0 flex-1">
-                <div className="text-[10px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold">
-                  {workspaceName}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-line)] gap-3">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <Avatar url={avatarUrl} name={displayName} size="md" />
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold">
+                    {workspaceName}
+                  </div>
+                  <div className="text-base font-extrabold truncate">Hey, {firstName}.</div>
                 </div>
-                <div className="text-base font-extrabold">Hey, {firstName}.</div>
               </div>
               <button
                 type="button"

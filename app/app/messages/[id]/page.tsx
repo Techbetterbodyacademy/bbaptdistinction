@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sendMessageAsCoach } from "./actions";
 import { scheduleMessageAsCoach, cancelScheduledMessage } from "./schedule-actions";
 import { MessageThread } from "@/components/messages/message-thread";
+import { Avatar } from "@/components/avatar";
 
 export default async function CoachThreadPage({
   params
@@ -25,7 +26,7 @@ export default async function CoachThreadPage({
     .from("message_thread")
     .select(`
       id, client_id, workspace_id,
-      client:client_id(id, user_profile:user_id(full_name))
+      client:client_id(id, user_profile:user_id(full_name, avatar_url))
     `)
     .eq("id", threadId)
     .eq("workspace_id", workspace!.id)
@@ -56,6 +57,7 @@ export default async function CoachThreadPage({
   const client = Array.isArray(thread.client) ? thread.client[0] : thread.client;
   const profile = client ? (Array.isArray(client.user_profile) ? client.user_profile[0] : client.user_profile) : null;
   const name = profile?.full_name ?? "Client";
+  const avatarUrl = (profile as { avatar_url?: string | null } | null)?.avatar_url ?? null;
 
   const initialMessages = (messages ?? []).map((m) => ({
     id: m.id,
@@ -73,11 +75,14 @@ export default async function CoachThreadPage({
         </Link>
 
         <header className="flex items-center justify-between mt-4 mb-2 pb-4 border-b border-[var(--color-line)] gap-4 flex-wrap">
-          <div>
-            <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-1">
-              Conversation
+          <div className="flex items-center gap-3 min-w-0">
+            <Avatar url={avatarUrl} name={name} size="lg" />
+            <div className="min-w-0">
+              <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-1">
+                Conversation
+              </div>
+              <h1 className="text-xl font-extrabold tracking-tight truncate">{name}</h1>
             </div>
-            <h1 className="text-xl font-extrabold tracking-tight">{name}</h1>
           </div>
           <Link href={`/app/clients/${thread.client_id}`} className="btn btn-ghost text-sm">
             View profile
