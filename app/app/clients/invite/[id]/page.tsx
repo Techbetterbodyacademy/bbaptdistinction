@@ -57,7 +57,7 @@ export default async function InviteShareLinkPage({
       ) : null}
 
       {sp.emailFailed === "1" ? (
-        <div className="mb-6 bg-[rgba(245,158,11,0.08)] border border-[rgba(245,158,11,0.3)] rounded-xl p-4 text-sm">
+        <div className="mb-6 bg-[rgba(148,163,184,0.08)] border border-[rgba(148,163,184,0.3)] rounded-xl p-4 text-sm">
           Email couldn&rsquo;t be sent (rate limit or Resend sandbox). Use the share link below instead.
         </div>
       ) : null}

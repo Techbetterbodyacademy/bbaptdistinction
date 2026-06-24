@@ -197,7 +197,7 @@ export default async function WatchesPage() {
           <h2 className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-warn)] font-bold mb-3">
             Needs intervention ({atRisk.length})
           </h2>
-          <div className="bg-[var(--color-surface)] border border-[rgba(245,158,11,0.3)] rounded-2xl overflow-hidden">
+          <div className="bg-[var(--color-surface)] border border-[rgba(148,163,184,0.3)] rounded-2xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-[10px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold">
@@ -223,7 +223,7 @@ export default async function WatchesPage() {
                       <span
                         className="inline-block px-2.5 py-1 rounded-full text-[10px] uppercase tracking-[1.5px] font-bold"
                         style={{
-                          backgroundColor: r.risk.level === "high" ? "rgba(239,68,68,0.15)" : "rgba(245,158,11,0.15)",
+                          backgroundColor: r.risk.level === "high" ? "rgba(239,68,68,0.15)" : "rgba(148,163,184,0.15)",
                           color: r.risk.level === "high" ? "var(--color-danger)" : "var(--color-warn)"
                         }}
                       >
@@ -239,7 +239,7 @@ export default async function WatchesPage() {
                 ))}
               </tbody>
             </table>
-            <div className="p-4 text-xs text-[var(--color-subtle)] bg-[rgba(245,158,11,0.04)] border-t border-[var(--color-line)]">
+            <div className="p-4 text-xs text-[var(--color-subtle)] bg-[rgba(148,163,184,0.04)] border-t border-[var(--color-line)]">
               These clients are headed for offboarded. Open the profile and either book a Catchup call or message them today. Move them to the <strong>Catchup call</strong> stage to track the intervention.
             </div>
           </div>

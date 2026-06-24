@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { sendMessageAsCoach } from "./actions";
 import { scheduleMessageAsCoach, cancelScheduledMessage } from "./schedule-actions";
-import { MessageThread } from "./message-thread";
+import { MessageThread } from "@/components/messages/message-thread";
 
 export default async function CoachThreadPage({
   params
@@ -83,7 +84,13 @@ export default async function CoachThreadPage({
         </header>
       </div>
 
-      <MessageThread threadId={thread.id} initialMessages={initialMessages} />
+      <MessageThread
+        threadId={thread.id}
+        initialMessages={initialMessages}
+        mySide="coach"
+        sendAction={sendMessageAsCoach}
+        emptyHint="Start the conversation. Say hi, ask about their week, share a quick tip."
+      />
 
       {scheduled && scheduled.length > 0 ? (
         <section className="mb-4 px-4 sm:px-6 lg:px-10">

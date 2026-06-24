@@ -191,9 +191,9 @@ function InviteRow({
   return (
     <Link
       href={`/app/clients/invite/${invite.id}`}
-      className="flex items-center gap-4 p-4 rounded-xl border border-[var(--color-line)] bg-[rgba(245,158,11,0.04)] hover:border-[var(--color-warn)] transition-colors"
+      className="flex items-center gap-4 p-4 rounded-xl border border-[var(--color-line)] bg-[rgba(148,163,184,0.04)] hover:border-[var(--color-warn)] transition-colors"
     >
-      <div className="shrink-0 w-11 h-11 rounded-full bg-[rgba(245,158,11,0.15)] text-[var(--color-warn)] font-extrabold text-sm flex items-center justify-center">
+      <div className="shrink-0 w-11 h-11 rounded-full bg-[rgba(148,163,184,0.15)] text-[var(--color-warn)] font-extrabold text-sm flex items-center justify-center">
         {initials || "?"}
       </div>
       <div className="flex-1 min-w-0">
@@ -203,7 +203,7 @@ function InviteRow({
       <div className="text-xs text-[var(--color-muted)] hidden md:block">
         Invited {new Date(invite.created_at).toLocaleDateString()}
       </div>
-      <span className="text-[11px] uppercase tracking-[1.5px] font-bold px-2.5 py-1 rounded-full bg-[rgba(245,158,11,0.15)] text-[var(--color-warn)]">
+      <span className="text-[11px] uppercase tracking-[1.5px] font-bold px-2.5 py-1 rounded-full bg-[rgba(148,163,184,0.15)] text-[var(--color-warn)]">
         Get link
       </span>
     </Link>
@@ -213,7 +213,7 @@ function InviteRow({
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, { bg: string; text: string }> = {
     active: { bg: "rgba(34,197,94,0.15)", text: "var(--color-ok)" },
-    paused: { bg: "rgba(245,158,11,0.15)", text: "var(--color-warn)" },
+    paused: { bg: "rgba(148,163,184,0.15)", text: "var(--color-warn)" },
     completed: { bg: "rgba(0,174,239,0.15)", text: "var(--color-blue-glow)" }
   };
   const c = colors[status] ?? { bg: "rgba(255,255,255,0.06)", text: "var(--color-muted)" };

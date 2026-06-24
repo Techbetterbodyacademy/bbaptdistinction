@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { sendMessageAsClient } from "./actions";
+import { MessageThread } from "@/components/messages/message-thread";
 
 export default async function ClientMessagesPage() {
   const supabase = await createClient();
@@ -57,63 +58,37 @@ export default async function ClientMessagesPage() {
     .update({ client_last_read_at: new Date().toISOString() })
     .eq("id", thread.id);
 
+  const initialMessages = (messages ?? []).map((m) => ({
+    id: m.id,
+    sender: (m.sender === "client" ? "client" : "coach") as "client" | "coach",
+    body: m.body,
+    created_at: m.created_at
+  }));
+
   return (
-    <main className="max-w-3xl mx-auto px-6 py-8 flex flex-col" style={{ minHeight: "calc(100vh - 80px)" }}>
-      <Link href="/client" className="text-sm text-[var(--color-muted)] hover:text-[var(--color-blue)]">
-        &larr; Home
-      </Link>
+    <main className="w-full flex flex-col" style={{ minHeight: "calc(100vh - 80px)" }}>
+      <div className="px-4 sm:px-6 lg:px-10 py-6">
+        <Link href="/client" className="text-sm text-[var(--color-muted)] hover:text-[var(--color-blue)]">
+          &larr; Home
+        </Link>
 
-      <header className="mt-4 mb-6 pb-4 border-b border-[var(--color-line)]">
-        <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-1">
-          Direct message
-        </div>
-        <h1 className="text-xl font-extrabold tracking-tight">
-          {workspace?.coach_name ?? "Your coach"}
-        </h1>
-      </header>
-
-      <div className="flex-1 space-y-3 mb-6 overflow-y-auto" style={{ minHeight: "300px" }}>
-        {(!messages || messages.length === 0) ? (
-          <div className="text-center py-12 text-sm text-[var(--color-muted)]">
-            Say hi to your coach. Questions, wins, struggles — it all lives here.
+        <header className="mt-4 mb-2 pb-4 border-b border-[var(--color-line)]">
+          <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-1">
+            Direct message
           </div>
-        ) : (
-          messages.map((m) => (
-            <div
-              key={m.id}
-              className={`flex ${m.sender === "client" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                  m.sender === "client"
-                    ? "bg-[var(--color-blue)] text-black"
-                    : "bg-[var(--color-surface)] border border-[var(--color-line)]"
-                }`}
-              >
-                <div className="text-sm whitespace-pre-wrap">{m.body}</div>
-                <div className={`text-[10px] mt-1 ${m.sender === "client" ? "text-black/60" : "text-[var(--color-subtle)]"}`}>
-                  {new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+          <h1 className="text-xl font-extrabold tracking-tight">
+            {workspace?.coach_name ?? "Your coach"}
+          </h1>
+        </header>
       </div>
 
-      <form action={sendMessageAsClient} className="flex gap-2 sticky bottom-0 bg-[var(--color-bg)] pt-3 border-t border-[var(--color-line)]">
-        <input type="hidden" name="thread_id" value={thread.id} />
-        <textarea
-          name="body"
-          rows={1}
-          required
-          placeholder="Type a message…"
-          className="input flex-1 resize-none"
-          style={{ minHeight: "44px" }}
-        />
-        <button type="submit" className="btn btn-primary self-end">
-          Send
-        </button>
-      </form>
+      <MessageThread
+        threadId={thread.id}
+        initialMessages={initialMessages}
+        mySide="client"
+        sendAction={sendMessageAsClient}
+        emptyHint="Say hi to your coach. Questions, wins, struggles, all lives here."
+      />
     </main>
   );
 }

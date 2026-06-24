@@ -47,7 +47,7 @@ export default async function BuyPage({
         </header>
 
         {sp.cancelled === "1" ? (
-          <div className="mb-8 bg-[rgba(245,158,11,0.08)] border border-[rgba(245,158,11,0.3)] rounded-xl p-4 text-sm text-center">
+          <div className="mb-8 bg-[rgba(148,163,184,0.08)] border border-[rgba(148,163,184,0.3)] rounded-xl p-4 text-sm text-center">
             Checkout cancelled. No charge was made.
           </div>
         ) : null}

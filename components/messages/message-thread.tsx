@@ -1,25 +1,28 @@
 "use client";
 
 import { useEffect, useOptimistic, useRef, useState, useTransition, startTransition } from "react";
-import { sendMessageAsCoach } from "./actions";
 
-type Message = {
+export type MessageRow = {
   id: string;
   sender: "coach" | "client";
   body: string;
   created_at: string;
   pending?: boolean;
-  failed?: boolean;
 };
 
 type Props = {
   threadId: string;
-  initialMessages: Message[];
+  initialMessages: MessageRow[];
+  /** Which side this current user is on. Their messages render right + blue. */
+  mySide: "coach" | "client";
+  /** Server action that takes a FormData with thread_id + body. */
+  sendAction: (formData: FormData) => Promise<void> | void;
+  emptyHint?: string;
 };
 
-export function MessageThread({ threadId, initialMessages }: Props) {
+export function MessageThread({ threadId, initialMessages, mySide, sendAction, emptyHint }: Props) {
   const [, startSubmit] = useTransition();
-  const [optimisticMessages, addOptimistic] = useOptimistic<Message[], Message>(
+  const [optimisticMessages, addOptimistic] = useOptimistic<MessageRow[], MessageRow>(
     initialMessages,
     (state, newMessage) => [...state, newMessage]
   );
@@ -48,14 +51,13 @@ export function MessageThread({ threadId, initialMessages }: Props) {
       startTransition(() => {
         addOptimistic({
           id: `pending-${Date.now()}`,
-          sender: "coach",
+          sender: mySide,
           body,
           created_at: new Date().toISOString(),
           pending: true
         });
       });
-      // Fire the server action (it triggers a redirect/refresh once committed)
-      sendMessageAsCoach(fd);
+      sendAction(fd);
     });
   }
 
@@ -75,33 +77,36 @@ export function MessageThread({ threadId, initialMessages }: Props) {
       >
         {optimisticMessages.length === 0 ? (
           <div className="text-center py-12 text-sm text-[var(--color-muted)]">
-            Start the conversation. Say hi, ask about their week, share a quick tip.
+            {emptyHint ?? "Start the conversation."}
           </div>
         ) : (
-          optimisticMessages.map((m) => (
-            <div key={m.id} className={`flex ${m.sender === "coach" ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                  m.sender === "coach"
-                    ? "bg-[var(--color-blue)] text-black"
-                    : "bg-[var(--color-surface)] border border-[var(--color-line)]"
-                } ${m.pending ? "opacity-70" : ""}`}
-              >
-                <div className="text-sm whitespace-pre-wrap">{m.body}</div>
-                <div className={`text-[10px] mt-1 flex items-center gap-1.5 ${m.sender === "coach" ? "text-black/60" : "text-[var(--color-subtle)]"}`}>
-                  <span>
-                    {new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                  </span>
-                  {m.pending ? (
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
-                      <span>Sending</span>
+          optimisticMessages.map((m) => {
+            const mine = m.sender === mySide;
+            return (
+              <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+                    mine
+                      ? "bg-[var(--color-blue)] text-black"
+                      : "bg-[var(--color-surface)] border border-[var(--color-line)]"
+                  } ${m.pending ? "opacity-70" : ""}`}
+                >
+                  <div className="text-sm whitespace-pre-wrap">{m.body}</div>
+                  <div className={`text-[10px] mt-1 flex items-center gap-1.5 ${mine ? "text-black/60" : "text-[var(--color-subtle)]"}`}>
+                    <span>
+                      {new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                     </span>
-                  ) : null}
+                    {m.pending ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
+                        <span>Sending</span>
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 

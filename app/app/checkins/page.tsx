@@ -113,7 +113,7 @@ export default async function CoachCheckinsPage({
                     Replied
                   </span>
                 ) : (
-                  <span className="text-[10px] uppercase tracking-[1.5px] font-bold px-2 py-1 rounded-full bg-[rgba(245,158,11,0.15)] text-[var(--color-warn)] shrink-0">
+                  <span className="text-[10px] uppercase tracking-[1.5px] font-bold px-2 py-1 rounded-full bg-[rgba(148,163,184,0.15)] text-[var(--color-warn)] shrink-0">
                     Pending
                   </span>
                 )}

@@ -110,7 +110,7 @@ export default async function DashboardPage() {
               </Link>
             ) : null}
             {cInvites > 0 ? (
-              <Link href="/app/clients" className="flex items-center justify-between p-3 rounded-xl bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.2)] hover:border-[var(--color-warn)] transition-colors">
+              <Link href="/app/clients" className="flex items-center justify-between p-3 rounded-xl bg-[rgba(148,163,184,0.06)] border border-[rgba(148,163,184,0.2)] hover:border-[var(--color-warn)] transition-colors">
                 <span className="font-semibold">{cInvites} pending invite{cInvites === 1 ? "" : "s"} — copy their share link</span>
                 <span className="text-[var(--color-warn)]">→</span>
               </Link>

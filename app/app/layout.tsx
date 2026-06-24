@@ -70,7 +70,8 @@ export default async function AppLayout({
   const counts = {
     messages: unreadThreads,
     checkins: recentCheckinsRes.count ?? 0,
-    clients: pendingInvitesRes.count ?? 0
+    clients: pendingInvitesRes.count ?? 0,
+    notifications: unreadThreads + (recentCheckinsRes.count ?? 0) + (pendingInvitesRes.count ?? 0)
   };
 
   return (

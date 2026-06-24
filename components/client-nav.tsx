@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 export type ClientNavCounts = {
   messages?: number;
   mealPlan?: number;
+  notifications?: number;
 };
 
 type Props = {
@@ -24,7 +25,9 @@ const NAV_LINKS = [
   { href: "/client/checkins", label: "Check-ins", countKey: undefined },
   { href: "/client/logbook", label: "Logbook", countKey: undefined },
   { href: "/client/library", label: "Library", countKey: undefined },
-  { href: "/client/messages", label: "Messages", countKey: "messages" as const }
+  { href: "/client/messages", label: "Messages", countKey: "messages" as const },
+  { href: "/client/notifications", label: "Notifications", countKey: "notifications" as const },
+  { href: "/client/settings", label: "Settings", countKey: undefined }
 ];
 
 export function ClientNav({ firstName, workspaceName, counts }: Props) {

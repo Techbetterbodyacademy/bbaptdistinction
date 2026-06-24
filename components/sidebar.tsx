@@ -34,6 +34,7 @@ type LibraryChild = NavItem & { icon: React.ReactNode; tint: string };
 
 const PRIMARY_NAV: NavItem[] = [
   { href: "/app", label: "Dashboard" },
+  { href: "/app/notifications", label: "Notifications" },
   { href: "/app/watches", label: "Business health" },
   { href: "/app/calendar", label: "Calendar" },
   { href: "/app/clients", label: "Clients" },
@@ -68,6 +69,7 @@ export type SidebarCounts = {
   messages?: number;
   checkins?: number;
   clients?: number;
+  notifications?: number;
 };
 
 export function Sidebar({
@@ -87,6 +89,7 @@ export function Sidebar({
     if (item.href === "/app/messages" && counts.messages) return { ...item, count: counts.messages };
     if (item.href === "/app/checkins" && counts.checkins) return { ...item, count: counts.checkins };
     if (item.href === "/app/clients" && counts.clients) return { ...item, count: counts.clients };
+    if (item.href === "/app/notifications" && counts.notifications) return { ...item, count: counts.notifications };
     return item;
   });
 

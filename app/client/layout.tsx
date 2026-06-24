@@ -76,7 +76,8 @@ export default async function ClientLayout({
 
   const counts = {
     messages: unreadMessageCount,
-    mealPlan: newMealPlanCount
+    mealPlan: newMealPlanCount,
+    notifications: unreadMessageCount + newMealPlanCount
   };
 
   return (

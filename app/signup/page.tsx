@@ -160,8 +160,8 @@ function SignupError({ error }: { error: string }) {
   };
 
   const e = map[error] ?? map.send;
-  const bg = e.tone === "danger" ? "rgba(239,68,68,0.08)" : "rgba(245,158,11,0.08)";
-  const border = e.tone === "danger" ? "rgba(239,68,68,0.3)" : "rgba(245,158,11,0.3)";
+  const bg = e.tone === "danger" ? "rgba(239,68,68,0.08)" : "rgba(148,163,184,0.08)";
+  const border = e.tone === "danger" ? "rgba(239,68,68,0.3)" : "rgba(148,163,184,0.3)";
   const titleColor = e.tone === "danger" ? "var(--color-danger)" : "var(--color-warn)";
 
   return (

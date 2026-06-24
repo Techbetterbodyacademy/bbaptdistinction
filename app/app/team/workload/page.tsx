@@ -124,7 +124,7 @@ export default async function WorkloadPage() {
                         </span>
                       ) : null}
                       {r.atRiskMedium > 0 ? (
-                        <span className="text-[10px] uppercase tracking-[1.5px] font-bold px-2 py-0.5 rounded-full bg-[rgba(245,158,11,0.15)] text-[var(--color-warn)]">
+                        <span className="text-[10px] uppercase tracking-[1.5px] font-bold px-2 py-0.5 rounded-full bg-[rgba(148,163,184,0.15)] text-[var(--color-warn)]">
                           {r.atRiskMedium} med
                         </span>
                       ) : null}
