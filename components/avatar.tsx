@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
 type Props = {
   url?: string | null;
   name: string;
@@ -22,8 +26,14 @@ function initialsFromName(name: string): string {
 export function Avatar({ url, name, size = "md", className = "" }: Props) {
   const { wh, text } = SIZE[size];
   const base = `${wh} rounded-full shrink-0 overflow-hidden border border-[var(--color-line)] ${className}`;
+  const [failed, setFailed] = useState(false);
 
-  if (url) {
+  // Reset the failed flag whenever the URL changes so a new upload re-attempts loading
+  useEffect(() => {
+    setFailed(false);
+  }, [url]);
+
+  if (url && !failed) {
     return (
       <span className={base}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -31,7 +41,10 @@ export function Avatar({ url, name, size = "md", className = "" }: Props) {
           src={url}
           alt={name}
           className="w-full h-full object-cover"
-          loading="lazy"
+          onError={(e) => {
+            console.error("[Avatar] image failed to load:", url, e);
+            setFailed(true);
+          }}
         />
       </span>
     );

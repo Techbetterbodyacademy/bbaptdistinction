@@ -140,12 +140,29 @@ export function AvatarUploader({ currentUrl, name, role, returnTo }: Props) {
       fd.append("avatar", croppedFile);
 
       const result = await saveProfilePictureClient(fd);
+      console.log("[avatar] save result:", result);
 
       if (!result.ok) {
         setError(result.error || "Upload failed");
         setOptimisticUrl(null);
         setUploading(false);
         return;
+      }
+
+      // Verify the new URL is actually reachable BEFORE swapping the UI
+      try {
+        const probe = await fetch(result.url, { method: "HEAD", cache: "no-store" });
+        if (!probe.ok) {
+          console.error("[avatar] uploaded URL not reachable:", result.url, "status:", probe.status);
+          setError(`Upload saved but image is not reachable (HTTP ${probe.status}). The bucket may not be public, or the path is wrong.`);
+          setOptimisticUrl(null);
+          setUploading(false);
+          return;
+        }
+        console.log("[avatar] URL probe OK:", result.url);
+      } catch (probeErr) {
+        console.error("[avatar] URL probe failed:", probeErr);
+        // Don't block — sometimes HEAD is blocked by CORS, GET via <img> still works.
       }
 
       // Swap from blob URL to the real cache-busted public URL
