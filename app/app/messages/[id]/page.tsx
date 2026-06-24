@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { sendMessageAsCoach } from "./actions";
 import { scheduleMessageAsCoach, cancelScheduledMessage } from "./schedule-actions";
+import { MessageThread } from "./message-thread";
 
 export default async function CoachThreadPage({
   params
@@ -56,54 +56,37 @@ export default async function CoachThreadPage({
   const profile = client ? (Array.isArray(client.user_profile) ? client.user_profile[0] : client.user_profile) : null;
   const name = profile?.full_name ?? "Client";
 
+  const initialMessages = (messages ?? []).map((m) => ({
+    id: m.id,
+    sender: (m.sender === "coach" ? "coach" : "client") as "coach" | "client",
+    body: m.body,
+    created_at: m.created_at
+  }));
+
   return (
-    <main className="px-10 py-8 max-w-3xl flex flex-col" style={{ minHeight: "calc(100vh - 0px)" }}>
-      <Link href="/app/messages" className="text-sm text-[var(--color-muted)] hover:text-[var(--color-blue)]">
-        &larr; Inbox
-      </Link>
-
-      <header className="flex items-center justify-between mt-4 mb-6 pb-4 border-b border-[var(--color-line)]">
-        <div>
-          <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-1">
-            Conversation
-          </div>
-          <h1 className="text-xl font-extrabold tracking-tight">{name}</h1>
-        </div>
-        <Link href={`/app/clients/${thread.client_id}`} className="btn btn-ghost text-sm">
-          View profile
+    <main className="w-full flex flex-col" style={{ minHeight: "calc(100vh - 0px)" }}>
+      <div className="px-4 sm:px-6 lg:px-10 py-6">
+        <Link href="/app/messages" className="text-sm text-[var(--color-muted)] hover:text-[var(--color-blue)]">
+          &larr; Inbox
         </Link>
-      </header>
 
-      <div className="flex-1 space-y-3 mb-6 overflow-y-auto" style={{ minHeight: "300px" }}>
-        {(!messages || messages.length === 0) ? (
-          <div className="text-center py-12 text-sm text-[var(--color-muted)]">
-            Start the conversation. Say hi, ask about their week, share a quick tip.
-          </div>
-        ) : (
-          messages.map((m) => (
-            <div
-              key={m.id}
-              className={`flex ${m.sender === "coach" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                  m.sender === "coach"
-                    ? "bg-[var(--color-blue)] text-black"
-                    : "bg-[var(--color-surface)] border border-[var(--color-line)]"
-                }`}
-              >
-                <div className="text-sm whitespace-pre-wrap">{m.body}</div>
-                <div className={`text-[10px] mt-1 ${m.sender === "coach" ? "text-black/60" : "text-[var(--color-subtle)]"}`}>
-                  {new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                </div>
-              </div>
+        <header className="flex items-center justify-between mt-4 mb-2 pb-4 border-b border-[var(--color-line)] gap-4 flex-wrap">
+          <div>
+            <div className="text-[11px] uppercase tracking-[1.5px] text-[var(--color-subtle)] font-bold mb-1">
+              Conversation
             </div>
-          ))
-        )}
+            <h1 className="text-xl font-extrabold tracking-tight">{name}</h1>
+          </div>
+          <Link href={`/app/clients/${thread.client_id}`} className="btn btn-ghost text-sm">
+            View profile
+          </Link>
+        </header>
       </div>
 
+      <MessageThread threadId={thread.id} initialMessages={initialMessages} />
+
       {scheduled && scheduled.length > 0 ? (
-        <section className="mb-4">
+        <section className="mb-4 px-4 sm:px-6 lg:px-10">
           <div className="text-[10px] uppercase tracking-[1.5px] font-bold text-[var(--color-subtle)] mb-2">
             Scheduled to send ({scheduled.length})
           </div>
@@ -112,7 +95,7 @@ export default async function CoachThreadPage({
               <form
                 key={s.id}
                 action={cancelScheduledMessage}
-                className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[rgba(245,158,11,0.05)] border border-[rgba(245,158,11,0.2)]"
+                className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[rgba(148,163,184,0.05)] border border-[rgba(148,163,184,0.2)]"
               >
                 <input type="hidden" name="thread_id" value={thread.id} />
                 <input type="hidden" name="scheduled_id" value={s.id} />
@@ -131,22 +114,7 @@ export default async function CoachThreadPage({
         </section>
       ) : null}
 
-      <form action={sendMessageAsCoach} className="flex gap-2 sticky bottom-0 bg-[var(--color-bg)] pt-3 border-t border-[var(--color-line)]">
-        <input type="hidden" name="thread_id" value={thread.id} />
-        <textarea
-          name="body"
-          rows={1}
-          required
-          placeholder="Type a message…"
-          className="input flex-1 resize-none"
-          style={{ minHeight: "44px" }}
-        />
-        <button type="submit" className="btn btn-primary self-end">
-          Send
-        </button>
-      </form>
-
-      <details className="mt-4 bg-[var(--color-surface)] border border-[var(--color-line)] rounded-2xl">
+      <details className="mt-4 mb-6 mx-4 sm:mx-6 lg:mx-10 bg-[var(--color-surface)] border border-[var(--color-line)] rounded-2xl">
         <summary className="cursor-pointer p-4 text-sm font-semibold">Schedule a message for later</summary>
         <form action={scheduleMessageAsCoach} className="p-4 pt-0 space-y-3">
           <input type="hidden" name="thread_id" value={thread.id} />

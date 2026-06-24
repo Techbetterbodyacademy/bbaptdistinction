@@ -64,14 +64,31 @@ const SECONDARY_NAV: NavItem[] = [
   { href: "/app/settings/billing", label: "Billing", soon: true }
 ];
 
+export type SidebarCounts = {
+  messages?: number;
+  checkins?: number;
+  clients?: number;
+};
+
 export function Sidebar({
   workspaceName,
-  coachName
+  coachName,
+  counts
 }: {
   workspaceName: string;
   coachName: string;
+  counts?: SidebarCounts;
 }) {
   const pathname = usePathname();
+
+  // Inject counts into the nav items at render time so the indicator badges show up.
+  const primaryNavWithCounts: NavItem[] = PRIMARY_NAV.map((item) => {
+    if (!counts) return item;
+    if (item.href === "/app/messages" && counts.messages) return { ...item, count: counts.messages };
+    if (item.href === "/app/checkins" && counts.checkins) return { ...item, count: counts.checkins };
+    if (item.href === "/app/clients" && counts.clients) return { ...item, count: counts.clients };
+    return item;
+  });
 
   const isLibraryActive = LIBRARY_CHILDREN.some(
     (l) => pathname === l.href || pathname.startsWith(l.href + "/")
@@ -125,7 +142,7 @@ export function Sidebar({
       </div>
 
       <nav className="px-3 py-4 flex-1 overflow-y-auto">
-        <NavGroup label="Coach" items={PRIMARY_NAV} pathname={pathname}>
+        <NavGroup label="Coach" items={primaryNavWithCounts} pathname={pathname}>
           <LibraryDropdown
             pathname={pathname}
             isActive={isLibraryActive}
@@ -240,9 +257,18 @@ function NavGroup({
                     : "text-[var(--color-muted)] hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--color-ink)]"
                 }`}
               >
-                <span>{item.label}</span>
-                {typeof item.count === "number" ? (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[var(--color-muted)]">
+                <span className="flex items-center gap-2">
+                  {item.label}
+                  {typeof item.count === "number" && item.count > 0 ? (
+                    <span
+                      aria-label={`${item.count} new`}
+                      className="w-1.5 h-1.5 rounded-full bg-[var(--color-blue-glow)] animate-pulse"
+                      style={{ boxShadow: "0 0 8px rgba(56,197,255,0.6)" }}
+                    />
+                  ) : null}
+                </span>
+                {typeof item.count === "number" && item.count > 0 ? (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(0,174,239,0.12)] text-[var(--color-blue-glow)] font-bold border border-[rgba(0,174,239,0.25)] min-w-[24px] text-center">
                     {item.count}
                   </span>
                 ) : null}

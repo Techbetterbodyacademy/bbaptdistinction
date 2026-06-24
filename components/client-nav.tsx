@@ -4,24 +4,34 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+export type ClientNavCounts = {
+  messages?: number;
+  mealPlan?: number;
+};
+
 type Props = {
   firstName: string;
   workspaceName: string;
+  counts?: ClientNavCounts;
 };
 
 const NAV_LINKS = [
-  { href: "/client", label: "Home" },
-  { href: "/client/program", label: "Program" },
-  { href: "/client/meal-plan", label: "Meal plan" },
-  { href: "/client/habits", label: "Habits" },
-  { href: "/client/sessions", label: "Sessions" },
-  { href: "/client/checkins", label: "Check-ins" },
-  { href: "/client/logbook", label: "Logbook" },
-  { href: "/client/library", label: "Library" },
-  { href: "/client/messages", label: "Messages" }
+  { href: "/client", label: "Home", countKey: undefined },
+  { href: "/client/program", label: "Program", countKey: undefined },
+  { href: "/client/meal-plan", label: "Meal plan", countKey: "mealPlan" as const },
+  { href: "/client/habits", label: "Habits", countKey: undefined },
+  { href: "/client/sessions", label: "Sessions", countKey: undefined },
+  { href: "/client/checkins", label: "Check-ins", countKey: undefined },
+  { href: "/client/logbook", label: "Logbook", countKey: undefined },
+  { href: "/client/library", label: "Library", countKey: undefined },
+  { href: "/client/messages", label: "Messages", countKey: "messages" as const }
 ];
 
-export function ClientNav({ firstName, workspaceName }: Props) {
+export function ClientNav({ firstName, workspaceName, counts }: Props) {
+  const getCount = (key: keyof ClientNavCounts | undefined): number => {
+    if (!key || !counts) return 0;
+    return counts[key] ?? 0;
+  };
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -56,17 +66,25 @@ export function ClientNav({ firstName, workspaceName }: Props) {
         <nav className="hidden lg:flex items-center gap-1">
           {NAV_LINKS.map((link) => {
             const isActive = pathname === link.href || (link.href !== "/client" && pathname.startsWith(link.href + "/"));
+            const count = getCount(link.countKey);
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm px-3 py-2 rounded-lg transition-colors ${
+                className={`text-sm px-3 py-2 rounded-lg transition-colors inline-flex items-center gap-1.5 ${
                   isActive
                     ? "text-[var(--color-blue-glow)] bg-[rgba(0,174,239,0.1)] font-semibold"
                     : "text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:bg-[rgba(255,255,255,0.04)]"
                 }`}
               >
                 {link.label}
+                {count > 0 ? (
+                  <span
+                    aria-label={`${count} new`}
+                    className="w-1.5 h-1.5 rounded-full bg-[var(--color-blue-glow)] animate-pulse"
+                    style={{ boxShadow: "0 0 8px rgba(56,197,255,0.6)" }}
+                  />
+                ) : null}
               </Link>
             );
           })}
@@ -80,18 +98,25 @@ export function ClientNav({ firstName, workspaceName }: Props) {
           </form>
         </nav>
 
-        {/* Mobile hamburger */}
+        {/* Mobile hamburger (with dot if any notifications) */}
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open menu"
-          className="lg:hidden p-2 rounded-lg hover:bg-[rgba(255,255,255,0.04)] shrink-0"
+          className="lg:hidden p-2 rounded-lg hover:bg-[rgba(255,255,255,0.04)] shrink-0 relative"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <line x1="4" y1="6" x2="20" y2="6" />
             <line x1="4" y1="12" x2="20" y2="12" />
             <line x1="4" y1="18" x2="20" y2="18" />
           </svg>
+          {(getCount("messages") > 0 || getCount("mealPlan") > 0) ? (
+            <span
+              aria-label="New notifications"
+              className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[var(--color-blue-glow)] animate-pulse"
+              style={{ boxShadow: "0 0 8px rgba(56,197,255,0.7)" }}
+            />
+          ) : null}
         </button>
       </div>
 
@@ -128,17 +153,32 @@ export function ClientNav({ firstName, workspaceName }: Props) {
             <nav className="flex-1 px-3 py-4 space-y-1">
               {NAV_LINKS.map((link) => {
                 const isActive = pathname === link.href || (link.href !== "/client" && pathname.startsWith(link.href + "/"));
+                const count = getCount(link.countKey);
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`block px-4 py-3 rounded-xl text-base transition-colors ${
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl text-base transition-colors ${
                       isActive
                         ? "text-[var(--color-blue-glow)] bg-[rgba(0,174,239,0.1)] font-semibold"
                         : "text-[var(--color-ink)] hover:bg-[rgba(255,255,255,0.04)]"
                     }`}
                   >
-                    {link.label}
+                    <span className="flex items-center gap-2">
+                      {link.label}
+                      {count > 0 ? (
+                        <span
+                          aria-label={`${count} new`}
+                          className="w-1.5 h-1.5 rounded-full bg-[var(--color-blue-glow)] animate-pulse"
+                          style={{ boxShadow: "0 0 8px rgba(56,197,255,0.6)" }}
+                        />
+                      ) : null}
+                    </span>
+                    {count > 0 ? (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(0,174,239,0.12)] text-[var(--color-blue-glow)] font-bold border border-[rgba(0,174,239,0.25)]">
+                        {count}
+                      </span>
+                    ) : null}
                   </Link>
                 );
               })}
