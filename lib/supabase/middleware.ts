@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   "/f",
   "/buy",
   "/c",
+  "/help",
   "/manifest.webmanifest",
   "/sw.js",
   "/bba-badge.png"
