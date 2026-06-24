@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type PointerEvent as RPointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/avatar";
-import { uploadProfilePicture, removeProfilePicture } from "@/lib/avatar-actions";
+import { saveProfilePictureClient, removeProfilePictureClient } from "@/lib/avatar-actions";
 
 type Props = {
   currentUrl?: string | null;
@@ -138,20 +138,26 @@ export function AvatarUploader({ currentUrl, name, role, returnTo }: Props) {
       const fd = new FormData();
       const croppedFile = new File([blob], "avatar.jpg", { type: "image/jpeg" });
       fd.append("avatar", croppedFile);
-      fd.append("role", role);
-      fd.append("return_to", returnTo);
 
-      await uploadProfilePicture(fd);
-      // The server action redirects, so the surrounding page will reload with the new URL.
-      router.refresh();
-      cancelCrop();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Upload failed";
-      // Server-action redirects throw a special NEXT_REDIRECT error that we should not treat as failure
-      if (msg.includes("NEXT_REDIRECT")) {
+      const result = await saveProfilePictureClient(fd);
+
+      if (!result.ok) {
+        setError(result.error || "Upload failed");
+        setOptimisticUrl(null);
+        setUploading(false);
         return;
       }
+
+      // Swap from blob URL to the real cache-busted public URL
+      setOptimisticUrl(result.url);
+      setUploading(false);
+      cancelCrop();
+      router.refresh();
+    } catch (err) {
+      console.error("[avatar-uploader] upload failed", err);
+      const msg = err instanceof Error ? err.message : "Upload failed";
       setError(msg);
+      setOptimisticUrl(null);
       setUploading(false);
     }
   }
@@ -159,16 +165,18 @@ export function AvatarUploader({ currentUrl, name, role, returnTo }: Props) {
   async function removeAvatar() {
     setError(null);
     setUploading(true);
-    const fd = new FormData();
-    fd.append("role", role);
-    fd.append("return_to", returnTo);
     setOptimisticUrl(null);
     try {
-      await removeProfilePicture(fd);
+      const result = await removeProfilePictureClient();
+      if (!result.ok) {
+        setError(result.error || "Remove failed");
+        setUploading(false);
+        return;
+      }
       router.refresh();
     } catch (err) {
+      console.error("[avatar-uploader] remove failed", err);
       const msg = err instanceof Error ? err.message : "Remove failed";
-      if (msg.includes("NEXT_REDIRECT")) return;
       setError(msg);
     } finally {
       setUploading(false);
