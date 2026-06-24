@@ -8,6 +8,8 @@ import { DOCS, getDocBySlug } from "../docs-config";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   return DOCS.map((d) => ({ slug: d.slug }));
 }
