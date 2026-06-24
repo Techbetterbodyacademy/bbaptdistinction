@@ -8,3 +8,6 @@ node_modules
 next-env.d.ts
 
 .vercel
+
+# SQL schema patches stay local, not pushed to GitHub
+*.sql
