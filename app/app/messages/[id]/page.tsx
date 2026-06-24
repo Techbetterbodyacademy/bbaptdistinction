@@ -36,7 +36,7 @@ export default async function CoachThreadPage({
   const [{ data: messages }, { data: scheduled }] = await Promise.all([
     supabase
       .from("message")
-      .select("id, sender, body, created_at, sender_user_id")
+      .select("id, sender, body, created_at, sender_user_id, reply_to_id")
       .eq("thread_id", thread.id)
       .order("created_at", { ascending: true }),
     supabase
@@ -61,7 +61,8 @@ export default async function CoachThreadPage({
     id: m.id,
     sender: (m.sender === "coach" ? "coach" : "client") as "coach" | "client",
     body: m.body,
-    created_at: m.created_at
+    created_at: m.created_at,
+    reply_to_id: m.reply_to_id ?? null
   }));
 
   return (

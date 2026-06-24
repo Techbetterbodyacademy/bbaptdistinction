@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 export async function sendMessageAsCoach(formData: FormData) {
   const threadId = String(formData.get("thread_id") ?? "");
   const body = String(formData.get("body") ?? "").trim();
+  const replyToRaw = String(formData.get("reply_to_id") ?? "");
+  const replyToId = replyToRaw && replyToRaw.length === 36 ? replyToRaw : null;
   if (!threadId || !body) redirect(`/app/messages/${threadId}`);
 
   const supabase = await createClient();
@@ -17,7 +19,8 @@ export async function sendMessageAsCoach(formData: FormData) {
     thread_id: threadId,
     sender: "coach",
     sender_user_id: user.id,
-    body
+    body,
+    reply_to_id: replyToId
   });
 
   if (error) {

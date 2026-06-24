@@ -48,7 +48,7 @@ export default async function ClientMessagesPage() {
 
   const { data: messages } = await supabase
     .from("message")
-    .select("id, sender, body, created_at")
+    .select("id, sender, body, created_at, reply_to_id")
     .eq("thread_id", thread.id)
     .order("created_at", { ascending: true });
 
@@ -62,7 +62,8 @@ export default async function ClientMessagesPage() {
     id: m.id,
     sender: (m.sender === "client" ? "client" : "coach") as "client" | "coach",
     body: m.body,
-    created_at: m.created_at
+    created_at: m.created_at,
+    reply_to_id: m.reply_to_id ?? null
   }));
 
   return (
